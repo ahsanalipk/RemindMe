@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Remind Me</string>
+    <string name="textView_Main">Welcome to the Reminders!</string>
+    <string name="btn_configure">Manage Reminders</string>
+    <string name="textView_confMain">Configure your current reminders</string>
+    <string name="btn_addreminder">Add Reminders</string>
+    <string name="textView_addMain">Add new reminders here...</string>
+    <string name="btn_settings">Settings</string>
+</resources>

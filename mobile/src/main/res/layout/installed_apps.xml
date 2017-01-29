@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="1"
+    android:id="@+id/relative_allAppsPopup">
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="349dp"
+        android:id="@+id/listview_allAppsOld"
+        android:layout_weight="0.40"
+        android:background="@android:color/holo_green_light"
+        android:choiceMode="multipleChoice"
+        tools:listheader="@color/cast_expanded_controller_background_color"
+        android:layout_centerVertical="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:text="Next"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_addReminder_1Old"
+        android:layout_weight="0.40"
+        android:textSize="24sp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="16dp" />
+</RelativeLayout>
