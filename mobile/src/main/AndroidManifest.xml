@@ -18,8 +18,14 @@
         <activity android:name=".ConfigureActivity" />
         <activity android:name=".AddRemindersActivity" />
         <activity android:name=".AddReminderStep1Activity" />
-        <service android:name=".MainServices"
+
+        <service
+            android:name=".MainServices"
             android:exported="false" />
+
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings"></activity>
     </application>
 
 </manifest>

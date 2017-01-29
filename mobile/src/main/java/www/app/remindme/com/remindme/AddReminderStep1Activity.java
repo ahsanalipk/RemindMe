@@ -17,6 +17,9 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,6 +35,8 @@ public class AddReminderStep1Activity extends AppCompatActivity {
     int count_selApps = 0;
     int i;
 
+    // ******************************************
+    // Get List of Installed Apps on the System
     protected void installedApps()
     {
         List<PackageInfo> packageList = getPackageManager().getInstalledPackages(0);
@@ -58,6 +63,8 @@ public class AddReminderStep1Activity extends AppCompatActivity {
         v_listview_installed_apps.setAdapter(arrayAdapter);
     }
 
+    // ******************************************
+    // Get List of Selected Apps by tht User
     protected void selectedApps()
     {
         v_btn_add_next = (Button) findViewById(R.id.btn_add_next);
@@ -90,15 +97,24 @@ public class AddReminderStep1Activity extends AppCompatActivity {
         });
     }
 
+    // ******************************************
+    // Save the Newly configured Rule
     protected void saveRulesData()
     {
-        SharedPreferences spRules = getSharedPreferences("MyRules", MODE_PRIVATE);
-        SharedPreferences.Editor spRulesEdit = spRules.edit();
-        for ( i=0; i<arr_selApps.length; i++){
+        try {
+            File fileRules = new File(getFilesDir(), "MyRules");
+            FileOutputStream fos = new FileOutputStream(fileRules, true);
 
-            spRulesEdit.putString("Using",arr_selApps[i]);
+            for ( i=0; i<arr_selApps.length; i++){
+                fos.write(arr_selApps[i].getBytes() );
+                fos.write('\n');
+                fos.flush();
+            }
+            fos.close();
         }
-        spRulesEdit.apply();
+        catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -108,8 +124,6 @@ public class AddReminderStep1Activity extends AppCompatActivity {
 
         installedApps();
         selectedApps();
-
-//        saveAddData();
 
     }
 }

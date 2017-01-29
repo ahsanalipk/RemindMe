@@ -10,12 +10,34 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="www.app.remindme.com.remindme.ConfigureActivity">
 
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/listview_allRules"
+        android:foregroundGravity="center"
+        android:layout_marginBottom="118dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true" />
+
     <TextView
         android:text="@string/textView_confMain"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="27dp"
-        android:id="@+id/textView_confMain" />
+        android:id="@+id/textView_confMain"
+        android:textSize="18sp"
+        android:layout_marginRight="154dp"
+        android:textAlignment="viewStart"
+        android:layout_above="@+id/btn_deleteSelRules"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="11dp"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:text="Delete Selected"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_deleteSelRules"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true" />
+
 </RelativeLayout>
