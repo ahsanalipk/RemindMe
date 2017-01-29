@@ -17,7 +17,9 @@
         </activity>
         <activity android:name=".ConfigureActivity" />
         <activity android:name=".AddRemindersActivity" />
-        <activity android:name=".AddReminderStep1Activity"></activity>
+        <activity android:name=".AddReminderStep1Activity" />
+        <service android:name=".MainServices"
+            android:exported="false" />
     </application>
 
 </manifest>

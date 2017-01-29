@@ -8,25 +8,40 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="www.app.remindme.com.remindme.AddReminderStep1Activity">
+    tools:context="www.app.remindme.com.remindme.AddReminderStep1Activity"
+    android:background="#005599">
 
     <ListView
         android:layout_width="match_parent"
         android:layout_height="349dp"
         android:id="@+id/listview_allApps"
-        android:background="@android:color/holo_green_light"
+        android:background="@android:color/holo_orange_light"
         android:choiceMode="multipleChoice"
-        tools:listheader="@color/cast_expanded_controller_background_color"
         android:layout_centerVertical="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:hapticFeedbackEnabled="true"
+        android:elevation="1dp" />
 
     <Button
         android:text="Next"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/btn_addReminder_1"
+        android:id="@+id/btn_add_next"
         android:textSize="24sp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="16dp"
+        android:elevation="1dp" />
+
+    <TextView
+        android:text="While using:"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:id="@+id/textView"
+        android:textSize="24sp"
+        android:textColor="#FFFFFF"
+        android:textColorLink="?attr/actionMenuTextColor" />
 </RelativeLayout>

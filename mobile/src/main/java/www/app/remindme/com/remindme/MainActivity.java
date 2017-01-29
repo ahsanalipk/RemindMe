@@ -10,6 +10,18 @@ public class MainActivity extends AppCompatActivity {
     Button v_btn_configure;
     Button v_btn_addreminders;
 
+    public void startMainService(View view)
+    {
+        Intent intent = new Intent(this, MainServices.class);
+        startService(intent);
+    }
+
+    public void stopMainService(View view)
+    {
+        Intent intent = new Intent(this, MainServices.class);
+        stopService(intent);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -20,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this, ConfigureActivity.class));
+                startMainService(v);
             }
         });
 

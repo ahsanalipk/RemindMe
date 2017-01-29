@@ -29,7 +29,8 @@
         android:layout_marginBottom="11dp"
         android:id="@+id/btn_settings"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignEnd="@+id/btn_configure"
+        android:layout_alignStart="@+id/btn_configure" />
 
     <Button
         android:text="@string/btn_configure"
@@ -46,6 +47,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/btn_addreminder"
         android:layout_alignBottom="@+id/btn_configure"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="72dp" />
+        android:layout_marginBottom="72dp"
+        android:layout_alignEnd="@+id/btn_configure"
+        android:layout_alignStart="@+id/btn_configure" />
 </RelativeLayout>
