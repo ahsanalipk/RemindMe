@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        startMainService();
+        //startMainService();
         setContentView(R.layout.activity_main);
 
         v_btn_configure  = (Button) findViewById(R.id.btn_configure);
@@ -36,7 +36,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this, ConfigureActivity.class));
-                //stopMainService();
             }
         });
 
@@ -45,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this, AddRemindersActivity.class));
-                //stopMainService();
             }
         });
 
