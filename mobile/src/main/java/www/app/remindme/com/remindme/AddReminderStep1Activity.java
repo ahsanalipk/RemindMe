@@ -90,9 +90,9 @@ public class AddReminderStep1Activity extends AppCompatActivity {
                     Toast toast = Toast.makeText(AddReminderStep1Activity.this, "Apps Selected." ,
                             Toast.LENGTH_SHORT);
                     toast.show();
+                    saveRulesData();
                 }
                 //v_listview_installed_apps.getSelectedItem();
-                saveRulesData();
             }
         });
     }
@@ -104,9 +104,11 @@ public class AddReminderStep1Activity extends AppCompatActivity {
         try {
             File fileRules = new File(getFilesDir(), "MyRules");
             FileOutputStream fos = new FileOutputStream(fileRules, true);
+            String toWrite;
 
             for ( i=0; i<arr_selApps.length; i++){
-                fos.write(arr_selApps[i].getBytes() );
+                toWrite = "With " + arr_selApps[i] + ", Remind of ";
+                fos.write(toWrite.getBytes() );
                 fos.write('\n');
                 fos.flush();
             }

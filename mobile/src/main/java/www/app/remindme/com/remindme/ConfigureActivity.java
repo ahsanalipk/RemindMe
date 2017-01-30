@@ -37,12 +37,16 @@ public class ConfigureActivity extends AppCompatActivity {
     // Save the Newly configured Rule
     protected void saveRulesData()
     {
+
         try {
             File fileRules = new File(getFilesDir(), "MyRules");
             FileOutputStream fos = new FileOutputStream(fileRules);
 
+            String toWrite;
+
             for ( i=0; i<arr_selRules.length; i++){
-                fos.write(arr_selRules[i].getBytes() );
+                toWrite = "With " + arr_selRules[i] + ", Remind of ";
+                fos.write(toWrite.getBytes() );
                 fos.write('\n');
                 fos.flush();
             }
@@ -125,8 +129,6 @@ public class ConfigureActivity extends AppCompatActivity {
         setContentView(R.layout.activity_configure);
 
         v_listview_allRules = (ListView) findViewById(R.id.listview_allRules);
-        loadRulesData();
-
         v_btn_deleteSelRules =  (Button) findViewById(R.id.btn_deleteSelRules);
         v_btn_deleteSelRules.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -134,5 +136,7 @@ public class ConfigureActivity extends AppCompatActivity {
                 deleteSelRules();
             }
         });
+
+        loadRulesData();
     }
 }

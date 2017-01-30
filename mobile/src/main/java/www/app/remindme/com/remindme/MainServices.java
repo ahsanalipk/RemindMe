@@ -1,16 +1,24 @@
 package www.app.remindme.com.remindme;
 
+import android.app.ActivityManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.widget.Toast;
+
+import java.util.List;
+
+import static android.app.ActivityManager.*;
 
 /*
  * Created by Ahsan Ali on 29/01/2017.
  */
 
 public class MainServices extends Service{
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -18,15 +26,22 @@ public class MainServices extends Service{
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Toast toast = Toast.makeText(MainServices.this, "Service Started Now", Toast.LENGTH_LONG);
+        Toast toast = Toast.makeText(MainServices.this, "Service Started Now", Toast.LENGTH_SHORT);
         toast.show();
         //return super.onStartCommand(intent, flags, startId);
+        ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningTaskInfo> tasks = activityManager.getRunningTasks(Integer.MAX_VALUE);
+
+        for (int i = 0; i < tasks.size(); i++) {
+            Log.d("Running task", "Running task: " + tasks.get(i).baseActivity.toShortString() + "\t\t ID: " + tasks.get(i).id);
+        }
+
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
-        Toast toast = Toast.makeText(MainServices.this, "Service Destroyed Now", Toast.LENGTH_LONG);
+        Toast toast = Toast.makeText(MainServices.this, "Service Stopped Now", Toast.LENGTH_SHORT);
         toast.show();
         super.onDestroy();
     }
