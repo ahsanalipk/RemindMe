@@ -91,7 +91,11 @@ public class AddReminderStep1Activity extends AppCompatActivity {
                     }
                 }
                 Toast.makeText(AddReminderStep1Activity.this, "Apps Selected." , Toast.LENGTH_SHORT).show();
-                saveRulesData();
+
+                Intent intent = new Intent(getApplicationContext(), AddReminderStep2Activity.class);
+                intent.putExtra("AppsSelected", arr_selApps);
+                startActivity(intent);
+                //saveRulesData();
             }
             }
         });
