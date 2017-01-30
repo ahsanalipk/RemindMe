@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.provider.Settings;
 import android.widget.Toast;
 
 import java.util.List;
@@ -22,7 +23,19 @@ import java.util.TreeMap;
 public class MainServices extends Service{
 
     private static Timer serviceTimer = new Timer();
-    private Context serviceContext;
+
+    private boolean checkPermission()
+    {
+        String appName = getCurrentApp();
+        if (null == appName){
+            startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
+            String msgtoSend = "Allow Usage Access First, and then Restart App!";
+            Toast.makeText(getApplicationContext(), msgtoSend, Toast.LENGTH_LONG).show();
+            return false;
+        }
+        return true;
+    }
+
     private void startTimer()
     {
         serviceTimer.scheduleAtFixedRate( new serviceTimerTask(), 0, 4000);
@@ -35,7 +48,8 @@ public class MainServices extends Service{
             String appName = getCurrentApp();
             Message msgtoSend = Message.obtain();
             msgtoSend.obj = appName;
-            timerToastHandler.sendMessage( msgtoSend);//.sendEmptyMessage(0);
+
+            timerToastHandler.sendMessage(msgtoSend);//.sendEmptyMessage(0);
         }
     }
 
@@ -52,13 +66,24 @@ public class MainServices extends Service{
         String currentApp = null;
 
         if (Build.VERSION.SDK_INT >= 21) {
+            UsageStatsManager usManage = (UsageStatsManager) this.getSystemService(Context.USAGE_STATS_SERVICE);
+            long currTime = System.currentTimeMillis();
+            List<UsageStats> runningApps = usManage.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, currTime - 1000 * 1000, currTime);
 
+            if (runningApps != null && runningApps.size() > 0) {
+                SortedMap<Long, UsageStats> mySortedMap = new TreeMap<>();
+
+                for (UsageStats usageStats : runningApps) {
+                    mySortedMap.put(usageStats.getLastTimeUsed(), usageStats);
+                }
+                if (!mySortedMap.isEmpty()) {
+                    currentApp = mySortedMap.get(mySortedMap.lastKey()).getPackageName();
+                }
+            }
         }
         else {
-            //startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
             ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
             List<ActivityManager.RunningAppProcessInfo> runningApps = activityManager.getRunningAppProcesses();
-
             currentApp = runningApps.get(0).processName;
         }
         return currentApp;
@@ -67,15 +92,15 @@ public class MainServices extends Service{
     @Override
     public void onCreate() {
         super.onCreate();
-        serviceContext = this;
-        startTimer();
+        if (checkPermission()) {
+            startTimer();
+            Toast.makeText(this, "Service Started...", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //String appName = getCurrentApp();
-
-        Toast.makeText(this, "Service Started...", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Service Started...", Toast.LENGTH_SHORT).show();
         return START_STICKY;
     }
 
@@ -90,42 +115,3 @@ public class MainServices extends Service{
         return null;
     }
 }
-
-
-
-
-
-/**
- * Created by Ahsan Ali on 29/01/2017.
-
-
- class CheckTopActivity extends Thread{
- ActivityManager am = null;
- Context context = null;
-
- public CheckTopActivity(Context con){
- context = con;
- am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
- }
-
- public void run(){
- Looper.prepare();
-
- while(true){
- // Return a list of the tasks that are currently running,
- // with the most recent being first and older ones after in order.
- // Taken 1 inside getRunningTasks method means want to take only
- // top activity from stack and forgot the olders.
- List< ActivityManager.RunningTaskInfo > taskInfo = am.getRunningTasks(1);
-
- String currentTopActivityName = taskInfo.get(0).topActivity.getClassName();
-
- if (currentTopActivityName.equals("PACKAGE_NAME.ACTIVITY_NAME")) {
- // show your activity here on top of PACKAGE_NAME.ACTIVITY_NAME
- Log.e(currentTopActivityName);
- }
- }
- Looper.loop();
- }
- }
- */

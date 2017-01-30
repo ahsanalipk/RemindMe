@@ -48,21 +48,65 @@ public class AddReminderStep1Activity extends AppCompatActivity {
             if ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0)
             {
                 String appName = packageInfo.applicationInfo.loadLabel(getPackageManager()).toString();
-                arr_allApps[count_userApps++] = appName;
+                String packName = packageInfo.packageName;
+                arr_allApps[count_userApps++] = appName+";"+packName;
             }
         }
         arr_allAppsOrdered = Arrays.copyOfRange( arr_allApps, 0, count_userApps);
         Arrays.sort(arr_allAppsOrdered, String.CASE_INSENSITIVE_ORDER);
 
+        String[] arr_allApps_appNamesOnly = new String[count_userApps];
+        for (i=0; i<count_userApps; i++) {
+            arr_allApps_appNamesOnly[i]= arr_allAppsOrdered[i].split(";")[0];
+        }
+
         v_listview_installed_apps = (ListView) findViewById(R.id.listview_allApps);
         v_listview_installed_apps.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_multiple_choice, arr_allAppsOrdered);
+                android.R.layout.simple_list_item_multiple_choice, arr_allApps_appNamesOnly);
 
         v_listview_installed_apps.setAdapter(arrayAdapter);
     }
 
+    /*
+      protected void installedApps()
+      {
+          List<PackageInfo> packageList = getPackageManager().getInstalledPackages(0);
+
+          arr_allApps = new String[2][packageList.size()];
+          for (i=0; i < packageList.size(); i++)
+          {
+              PackageInfo packageInfo = packageList.get(i);
+              if ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0)
+              {
+                  String appName = packageInfo.applicationInfo.loadLabel(getPackageManager()).toString();
+                  String packName = packageInfo.packageName;
+                  arr_allApps[0][count_userApps] = appName;
+                  arr_allApps[1][count_userApps++] = packName;
+              }
+          }
+
+          arr_allAppsOrdered = new String[2][count_userApps];
+          for (i=0; i< 2; i++)
+              System.arraycopy(arr_allApps[i], 0, arr_allAppsOrdered[i], 0, count_userApps);
+
+          //Arrays.sort(arr_allAppsOrdered, String.CASE_INSENSITIVE_ORDER);
+          Arrays.sort(arr_allAppsOrdered, new Comparator<String[]>() {
+              public int compare(String[] o1, String[] o2) {
+                  return o1[0].compareToIgnoreCase(o2[0]);
+              }
+          });
+
+          v_listview_installed_apps = (ListView) findViewById(R.id.listview_allApps);
+          v_listview_installed_apps.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+
+          ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this,
+                  android.R.layout.simple_list_item_multiple_choice, arr_allAppsOrdered[0]);
+
+          v_listview_installed_apps.setAdapter(arrayAdapter);
+      }
+  */
     // ******************************************
     // Get List of Selected Apps by tht User
     protected void selectedApps()
