@@ -1,5 +1,6 @@
 package www.app.remindme.com.remindme;
 
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Button;
@@ -47,7 +48,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        SharedPreferences spRules = getSharedPreferences("MyConfig", MODE_PRIVATE);
+
         v_btn_enableServices  = (ToggleButton) findViewById(R.id.btn_enableServices);
+        v_btn_enableServices.setChecked(spRules.getBoolean("ServiceEnabled", false));
+
         v_btn_enableServices.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -56,7 +61,15 @@ public class MainActivity extends AppCompatActivity {
                 else
                     stopMainService();
             }
+
         });
+/*
+        SharedPreferences.OnSharedPreferenceChangeListener listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+
+            }
+        };*/
     }
 
     @Override
