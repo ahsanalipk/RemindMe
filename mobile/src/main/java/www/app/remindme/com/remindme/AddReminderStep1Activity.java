@@ -66,7 +66,7 @@ public class AddReminderStep1Activity extends AppCompatActivity {
     }
 
     // Selected Apps
-    public void selectedApps()
+    protected void selectedApps()
     {
         v_btn_add_next = (Button) findViewById(R.id.btn_add_next);
         v_btn_add_next.setOnClickListener( new View.OnClickListener()
@@ -86,41 +86,18 @@ public class AddReminderStep1Activity extends AppCompatActivity {
                 {
                     if ( selectedApps.get(i)){
 
-                        Toast.makeText(AddReminderStep1Activity.this, arr_allAppsOrdered[i], Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(AddReminderStep1Activity.this, arr_allAppsOrdered[i], Toast.LENGTH_SHORT).show();
                         arr_selApps[--count_selApps] = arr_allAppsOrdered[i];//  v_listview_installed_apps.getItemAtPosition(i).toString();
                     }
                 }
-                Toast.makeText(AddReminderStep1Activity.this, "Apps Selected." , Toast.LENGTH_SHORT).show();
+                //Toast.makeText(AddReminderStep1Activity.this, "Apps Selected." , Toast.LENGTH_SHORT).show();
 
                 Intent intent = new Intent(getApplicationContext(), AddReminderStep2Activity.class);
                 intent.putExtra("AppsSelected", arr_selApps);
                 startActivity(intent);
-                //saveRulesData();
             }
             }
         });
-    }
-
-    // ******************************************
-    // Save the Newly configured Rule
-    protected void saveRulesData()
-    {
-        try {
-            File fileRules = new File(getFilesDir(), "MyRules");
-            FileOutputStream fos = new FileOutputStream(fileRules, true);
-            String toWrite;
-
-            for ( i=0; i<arr_selApps.length; i++){
-                toWrite = "With " + arr_selApps[i] + ", Remind of ";
-                fos.write(toWrite.getBytes() );
-                fos.write('\n');
-                fos.flush();
-            }
-            fos.close();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override

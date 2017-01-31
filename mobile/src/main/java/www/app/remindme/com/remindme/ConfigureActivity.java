@@ -35,7 +35,7 @@ public class ConfigureActivity extends AppCompatActivity {
 
     // ******************************************
     // Save the Newly configured Rule
-    protected void saveRulesData()
+    protected void saveRulesData(String[] selRules)
     {
 
         try {
@@ -45,7 +45,7 @@ public class ConfigureActivity extends AppCompatActivity {
             String toWrite;
 
             for ( i=0; i<arr_selRules.length; i++){
-                toWrite = "With " + arr_selRules[i] + ", Remind of ";
+                toWrite = selRules[i];//"With " + arr_selRules[i] + ", Remind of ";
                 fos.write(toWrite.getBytes() );
                 fos.write('\n');
                 fos.flush();
@@ -71,7 +71,7 @@ public class ConfigureActivity extends AppCompatActivity {
 
             buffer.close();
             fis.close();
-            printRulesData();
+            printRulesData(arr_loadedRules, arr_loadedRules.size());
         }
         catch (Exception e) {
             //e.printStackTrace();
@@ -81,13 +81,25 @@ public class ConfigureActivity extends AppCompatActivity {
         }
     }
 
-    public void printRulesData()
+    public void printRulesData(ArrayList<String> input, int countR)
     {
+
+        String[][] output;
+        String[] input_arr = input.toArray( new String[countR]);
+        String[] outputPrint;
+
+        output = new String[countR][4];
+        outputPrint = new String[countR];
+
+        for(int i=0; i<countR; i++ ) {
+            output[i] = input_arr[i].split(";");
+            outputPrint[i] = "When " + output[i][0] +", Remind " + output[i][2] +"ing " +output[i][3];
+        }
         v_listview_allRules.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
         if (!arr_loadedRules.isEmpty())
         {
-            arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_multiple_choice, arr_loadedRules);
+            arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_multiple_choice, outputPrint);
             v_listview_allRules.setAdapter(arrayAdapter);
         }
     }
@@ -109,14 +121,14 @@ public class ConfigureActivity extends AppCompatActivity {
             for ( i=0; i<count_userRules; i++)
             {
                 if ( !selectedApps.get(i)){
-                    arr_selRules[--count_remainRules] =  v_listview_allRules.getItemAtPosition(i).toString();
+                    arr_selRules[--count_remainRules] = arr_loadedRules.get(i) ;//v_listview_allRules.getItemAtPosition(i).toString();
                 }
             }
             Toast toast = Toast.makeText(ConfigureActivity.this, "Rules Refreshed." ,
                     Toast.LENGTH_LONG);
             toast.show();
 
-            saveRulesData();
+            saveRulesData(arr_selRules);
             loadRulesData();
             arrayAdapter.notifyDataSetChanged();
             finish();

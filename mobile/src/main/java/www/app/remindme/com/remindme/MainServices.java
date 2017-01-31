@@ -10,13 +10,14 @@ import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.provider.Settings;
+import android.provider.Telephony;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -36,7 +37,9 @@ public class MainServices extends Service{
 
     private static Timer serviceTimer = new Timer();
     private static boolean serviceTimerRunning = false;
-    private ArrayList<String> myAllRules;
+    String prevFGApp;
+    ArrayList<String> myAllRules;
+    String[][] myDecodedRules;
 
     private boolean checkPermission()
     {
@@ -55,6 +58,10 @@ public class MainServices extends Service{
             Toast.makeText(getApplicationContext(), msgtoSend, Toast.LENGTH_LONG).show();
             return false;
         }
+
+        int countRules = myAllRules.size();
+        myDecodedRules = new String[countRules][1];
+        myDecodedRules = decodeMyRules(myAllRules, countRules);
         return true;
     }
 
@@ -80,11 +87,19 @@ public class MainServices extends Service{
             String appName = getCurrentApp();
             Message msgtoSend = Message.obtain();
             msgtoSend.obj = appName;
-            if (appName.equals( "com.example.android.apis"))
-                PushNotification();
-            timerToastHandler.sendMessage(msgtoSend);//.sendEmptyMessage(0);
+
+            if (!appName.equals(prevFGApp)) {
+                // App not changed, so no need for multiple notifications.
+                prevFGApp = appName;
+                for (int i = 0; i < myDecodedRules.length; i++)
+                    if (appName.equals(myDecodedRules[i][1]))
+                        pushNotification(myDecodedRules[i], i);
+
+                timerToastHandler.sendMessage(msgtoSend);//.sendEmptyMessage(0);
+            }
         }
     }
+
 
     private final Handler timerToastHandler = new Handler()
     {
@@ -93,6 +108,7 @@ public class MainServices extends Service{
             Toast.makeText(getApplicationContext(), "Hello " + msg.obj, Toast.LENGTH_SHORT).show();
         }
     };
+
 
     public String getCurrentApp()
     {
@@ -122,6 +138,7 @@ public class MainServices extends Service{
         return currentApp;
     }
 
+
     public ArrayList<String> getMyRules()
     {
         ArrayList<String> arr_loadedRules = new ArrayList<>();
@@ -142,26 +159,72 @@ public class MainServices extends Service{
             Toast toast = Toast.makeText(this, "No Reminder Defined Yet!", Toast.LENGTH_SHORT);
             toast.show();
         }
-
         return arr_loadedRules;
     }
 
-    public void PushNotification()
+
+    public String[][] decodeMyRules( ArrayList<String> input, int countR)
     {
+        String[][] output;
+        String[] input_arr = input.toArray( new String[countR]);
+
+        output = new String[countR][4];
+        for(int i=0; i<countR; i++ )
+            output[i] = input_arr[i].split(";");
+
+        return output;
+    }
+
+
+    public void pushNotification(String[] ruleFound, int ruleNmbr)
+    {
+        String appToLaunch;
+        if( ruleFound[3].equals( "Call" ))
+            appToLaunch = Telephony.Sms.getDefaultSmsPackage(MainServices.this);
+        if( ruleFound[3].equals( "Text" ))
+            appToLaunch = Telephony.Sms.getDefaultSmsPackage(MainServices.this);
+        if( ruleFound[3].equals( "Mail" ))
+            appToLaunch = Telephony.Sms.getDefaultSmsPackage(MainServices.this);
+
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         Notification.Builder builder = new Notification.Builder(this);
         Intent notificationIntent = new Intent(this, MainActivity.class);
+        /*
+        Intent notificationIntent = new Intent(android.content.Intent.ACTION_VIEW);
+        notificationIntent.addCategory(Intent.CATEGORY_DEFAULT);
+        notificationIntent.setType("vnd.android-dir/mms-sms");
+        */
+
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
         builder.setContentIntent(contentIntent);
-        builder.setSmallIcon(R.drawable.cast_ic_notification_0);
-        builder.setContentText("Content of the Notification");
-        builder.setContentTitle("title");
+        //builder.setSmallIcon(R.drawable.cast_ic_notification_0);
+        builder.setContentText("Using "+ ruleFound[0] +
+        "? Why not " + ruleFound[2] + " " +ruleFound [3] + " instead.");
+
+        builder.setContentTitle("Reminding you of a " + ruleFound[2]);
         builder.setAutoCancel(true);
         builder.setDefaults(Notification.DEFAULT_ALL);
+        builder.setSmallIcon(R.mipmap.ic_launcher);
+        builder.setLargeIcon(BitmapFactory.decodeResource(this.getResources(), R.mipmap.ic_launcher));
+        builder.setPriority(Notification.PRIORITY_HIGH);
+        builder.setVibrate( new long [0]);
 
         Notification notification = builder.build();
-        nm.notify(1,notification);
+
+        notification.flags |= Notification.FLAG_AUTO_CANCEL;
+        notification.defaults |= Notification.DEFAULT_LIGHTS;
+        nm.notify(ruleNmbr,notification);
+
+
+/*
+
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+        notification.flags |= Notification.FLAG_AUTO_CANCEL;
+        nm.notify(0, notification);
+*/
     }
 
     public void setServiceConfig(boolean serviceState)
