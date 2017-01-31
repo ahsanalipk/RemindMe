@@ -11,13 +11,14 @@ import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Message;
 import android.provider.Settings;
 import android.provider.Telephony;
-import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 import java.io.BufferedInputStream;
@@ -89,6 +90,11 @@ public class MainServices extends Service{
     {
         @Override
         public void run() {
+            SharedPreferences spRules = getSharedPreferences("MyConfig", MODE_PRIVATE);
+            if (!spRules.getBoolean("LatestRulesInService", false)){
+                checkPermission();
+            }
+
             String appName = getCurrentApp();
             Message msgtoSend = Message.obtain();
             msgtoSend.obj = appName;
@@ -185,52 +191,54 @@ public class MainServices extends Service{
     public void pushNotification(String[] ruleFound, int ruleNmbr)
     {
         String appToLaunch;
-        if( ruleFound[3].equals( "Call" ))
-            appToLaunch = Telephony.Sms.getDefaultSmsPackage(MainServices.this);
-        if( ruleFound[3].equals( "Text" ))
-            appToLaunch = Telephony.Sms.getDefaultSmsPackage(MainServices.this);
-        if( ruleFound[3].equals( "Mail" ))
-            appToLaunch = Telephony.Sms.getDefaultSmsPackage(MainServices.this);
+        PackageManager pm = getApplicationContext().getPackageManager();
+        Intent appLaunchIntent = new Intent(this, MainActivity.class); // Default open this App
 
-        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        switch (ruleFound[2]) {
+            case "Call":
+                appLaunchIntent = new Intent(Intent.ACTION_DIAL);
+                break;
+
+            case "Text":
+                appToLaunch = Telephony.Sms.getDefaultSmsPackage(MainServices.this);
+                try {
+                    if (pm != null) {
+                        ApplicationInfo app = pm.getApplicationInfo(appToLaunch, 0);
+                        appLaunchIntent = pm.getLaunchIntentForPackage(appToLaunch);
+                    }
+                } catch (PackageManager.NameNotFoundException e) {
+                    e.printStackTrace();
+                }
+                break;
+
+            case "Mail":
+                appLaunchIntent = new Intent(Intent.ACTION_SEND);
+                break;
+
+            default:
+                break;
+        }
+
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, appLaunchIntent, 0);
+
         Notification.Builder builder = new Notification.Builder(this);
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        /*
-        Intent notificationIntent = new Intent(android.content.Intent.ACTION_VIEW);
-        notificationIntent.addCategory(Intent.CATEGORY_DEFAULT);
-        notificationIntent.setType("vnd.android-dir/mms-sms");
-        */
-
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-
-        builder.setContentIntent(contentIntent);
-        //builder.setSmallIcon(R.drawable.cast_ic_notification_0);
-        builder.setContentText("Using "+ ruleFound[0] +
-        "? Why not " + ruleFound[2] + " " +ruleFound [3] + " instead.");
-
         builder.setContentTitle("Reminding you of a " + ruleFound[2]);
+        builder.setContentText("Using "+ ruleFound[0] +"? Why not "+ ruleFound[2] +" "+ ruleFound[3] +" instead.");
+
         builder.setAutoCancel(true);
         builder.setDefaults(Notification.DEFAULT_ALL);
         builder.setSmallIcon(R.drawable.ic_stat_name);//.mipmap.tim_span64);
         builder.setLargeIcon(BitmapFactory.decodeResource(this.getResources(), R.drawable.ic_stat_name));
         builder.setPriority(Notification.PRIORITY_HIGH);
         builder.setVibrate( new long [0]);
+        builder.setContentIntent(contentIntent);
 
         Notification notification = builder.build();
-
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
         notification.defaults |= Notification.DEFAULT_LIGHTS;
+
+        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         nm.notify(ruleNmbr,notification);
-
-
-/*
-
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-
-        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-        nm.notify(0, notification);
-*/
     }
 
     public void setServiceConfig(boolean serviceState)

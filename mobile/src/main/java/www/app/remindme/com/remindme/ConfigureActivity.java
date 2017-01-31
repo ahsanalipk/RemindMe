@@ -1,5 +1,6 @@
 package www.app.remindme.com.remindme;
 
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.SparseBooleanArray;
@@ -36,7 +37,7 @@ public class ConfigureActivity extends AppCompatActivity {
     // Save the Newly configured Rule
     protected void saveRulesData(String[] selRules)
     {
-
+        SharedPreferences spRules = getSharedPreferences("MyConfig", MODE_PRIVATE);
         try {
             File fileRules = new File(getFilesDir(), "MyRules");
             FileOutputStream fos = new FileOutputStream(fileRules);
@@ -50,6 +51,7 @@ public class ConfigureActivity extends AppCompatActivity {
                 fos.flush();
             }
             fos.close();
+            spRules.edit().putBoolean("LatestRulesInService", false).apply();
         }
         catch (IOException e) {
             e.printStackTrace();

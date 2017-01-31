@@ -3,9 +3,11 @@ package www.app.remindme.com.remindme;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -24,7 +26,7 @@ public class AddReminderStep2Activity extends AppCompatActivity {
     Bundle extrasInIntent;
     String[] arr_fromStep1;
     String[] arr_forStep3;
-    String[] arr_allTargets = {"Call", "Text", "Mail", "Note to"};
+    String[] arr_allTargets = {"Call", "Text", "Mail", "Note"};
 
     int i, count_selApps;
     String textEntered;
@@ -73,12 +75,18 @@ public class AddReminderStep2Activity extends AppCompatActivity {
     protected void showPopup()
     {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(AddReminderStep2Activity.this);
+
         final EditText et = new EditText(AddReminderStep2Activity.this);
+        et.requestFocus();
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,InputMethodManager.HIDE_IMPLICIT_ONLY);
+        imm.showSoftInput(et, InputMethodManager.SHOW_IMPLICIT);
 
         alertDialogBuilder.setView(et);
 
         // set dialog message
-        alertDialogBuilder.setCancelable(false)
+        alertDialogBuilder.setCancelable(true)
+                .setTitle("Enter Reminder")
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         textEntered = et.getText().toString();
@@ -104,6 +112,7 @@ public class AddReminderStep2Activity extends AppCompatActivity {
     // Save the Newly configured Rule
     protected void saveRulesData()
     {
+        SharedPreferences spRules = getSharedPreferences("MyConfig", MODE_PRIVATE);
         try {
             File fileRules = new File(getFilesDir(), "MyRules");
             FileOutputStream fos = new FileOutputStream(fileRules, true);
@@ -117,6 +126,7 @@ public class AddReminderStep2Activity extends AppCompatActivity {
             }
             fos.close();
             finish();
+            spRules.edit().putBoolean("LatestRulesInService", false).apply();
 
         }
         catch (IOException e) {
@@ -132,7 +142,9 @@ public class AddReminderStep2Activity extends AppCompatActivity {
         extrasInIntent = getIntent().getExtras();
         if (extrasInIntent != null){
             arr_fromStep1 = extrasInIntent.getStringArray("AppsSelected");
-            count_selApps = arr_fromStep1.length;
+            if (arr_fromStep1 != null) {
+                count_selApps = arr_fromStep1.length;
+            }
 
         }
         fillTargets();

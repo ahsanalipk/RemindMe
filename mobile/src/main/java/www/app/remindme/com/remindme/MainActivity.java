@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
         v_btn_addreminders.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, AddRemindersActivity.class));
+                startActivity(new Intent(MainActivity.this, AddReminderStep1Activity.class)); // Skipped AddRemindersActivity Screen. Future Usage
             }
         });
 
