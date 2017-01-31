@@ -10,6 +10,16 @@ import android.widget.CompoundButton;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 public class MainActivity extends AppCompatActivity {
     Button v_btn_configure;
     Button v_btn_addreminders;
@@ -57,10 +67,27 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        SharedPreferences spRules = getSharedPreferences("MyConfig", MODE_PRIVATE);
-
         v_btn_enableServices  = (ToggleButton) findViewById(R.id.btn_enableServices);
-        v_btn_enableServices.setChecked(spRules.getBoolean("ServiceEnabled", false));
+
+        SharedPreferences spRules = getSharedPreferences("MyConfig", MODE_PRIVATE);
+        File fileRules = new File(getFilesDir(), "MyRules");
+        InputStream fis;
+        try {
+            fis = new BufferedInputStream(new FileInputStream(fileRules));
+            BufferedReader buffer = new BufferedReader(new InputStreamReader(fis));
+            if (buffer.readLine() == null)
+                v_btn_enableServices.setChecked(spRules.getBoolean("ServiceEnabled", false));
+            else
+                spRules.edit().putBoolean("ServiceEnabled", false).apply();
+
+            buffer.close();
+            fis.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        //v_btn_enableServices.setChecked(spRules.getBoolean("ServiceEnabled", false));
         if (v_btn_enableServices.isChecked())
             startMainService();
 
@@ -79,6 +106,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        SharedPreferences spRules = getSharedPreferences("MyConfig", MODE_PRIVATE);
+        v_btn_enableServices.setChecked(spRules.getBoolean("ServiceEnabled", false));
     }
 
     @Override

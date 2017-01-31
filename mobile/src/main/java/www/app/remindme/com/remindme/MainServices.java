@@ -8,17 +8,23 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.provider.Settings;
 import android.provider.Telephony;
+import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
 
 import java.io.BufferedInputStream;
@@ -47,8 +53,13 @@ public class MainServices extends Service{
     {
         String appName = getCurrentApp();
         if (null == appName){
-            String msgtoSend = "Allow Usage Access First, and then Re-enable App!";
-            Toast.makeText(getApplicationContext(), msgtoSend, Toast.LENGTH_LONG).show();
+            String msgtoSend_txt = "Allow Usage Access First, and then Re-enable App!";
+            //Toast.makeText(getApplicationContext(), msgtoSend_txt, Toast.LENGTH_LONG).show();
+
+            Message msgtoSend = Message.obtain();
+            msgtoSend.obj = msgtoSend_txt;
+            timerToastHandler.sendMessage(msgtoSend);
+
             startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             return false;
         }
@@ -56,8 +67,12 @@ public class MainServices extends Service{
         myAllRules = new ArrayList<>();
         myAllRules = getMyRules();
         if (myAllRules.isEmpty()){
-            String msgtoSend = "No Reminders Defined.";//\n No Service to Start!";
-            Toast.makeText(getApplicationContext(), msgtoSend, Toast.LENGTH_LONG).show();
+            String msgtoSend_txt = "No Reminders Defined.";//\n No Service to Start!";
+            //Toast.makeText(getApplicationContext(), msgtoSend, Toast.LENGTH_LONG).show();
+
+            Message msgtoSend = Message.obtain();
+            msgtoSend.obj = msgtoSend_txt;
+            timerToastHandler.sendMessage(msgtoSend);
             setServiceConfig(false);
             return false;
         }
@@ -91,8 +106,10 @@ public class MainServices extends Service{
         @Override
         public void run() {
             SharedPreferences spRules = getSharedPreferences("MyConfig", MODE_PRIVATE);
-            if (!spRules.getBoolean("LatestRulesInService", false)){
+            if (!spRules.getBoolean("LatestRulesInService", false)) {
+                spRules = getSharedPreferences("MyConfig", MODE_PRIVATE);
                 checkPermission();
+                spRules.edit().putBoolean("LatestRulesInService", true).apply();
             }
 
             String appName = getCurrentApp();
@@ -111,15 +128,15 @@ public class MainServices extends Service{
         }
     }
 
-/*
+
     private final Handler timerToastHandler = new Handler()
     {
         @Override
         public void handleMessage(Message msg) {
-            Toast.makeText(getApplicationContext(), "Hello " + msg.obj, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), (CharSequence) msg.obj, Toast.LENGTH_SHORT).show();
         }
     };
-*/
+
 
     @TargetApi(22)
     public String getCurrentApp()
@@ -167,9 +184,9 @@ public class MainServices extends Service{
             fis.close();
         }
         catch (Exception e) {
-            //e.printStackTrace();
-            Toast toast = Toast.makeText(this, "No Reminder Defined Yet!", Toast.LENGTH_SHORT);
-            toast.show();
+            e.printStackTrace();
+            //Toast toast = Toast.makeText(this, "No Reminder Defined Yet!", Toast.LENGTH_SHORT);
+            //toast.show();
         }
         return arr_loadedRules;
     }
@@ -196,7 +213,8 @@ public class MainServices extends Service{
 
         switch (ruleFound[2]) {
             case "Call":
-                appLaunchIntent = new Intent(Intent.ACTION_DIAL);
+                appLaunchIntent = new Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", ruleFound[3], null));
+
                 break;
 
             case "Text":
@@ -204,7 +222,20 @@ public class MainServices extends Service{
                 try {
                     if (pm != null) {
                         ApplicationInfo app = pm.getApplicationInfo(appToLaunch, 0);
-                        appLaunchIntent = pm.getLaunchIntentForPackage(appToLaunch);
+                        //appLaunchIntent = pm.getLaunchIntentForPackage(appToLaunch);
+
+                        appLaunchIntent = new Intent(Intent.ACTION_VIEW);
+                        appLaunchIntent.setData(Uri.parse("smsto:" + Uri.encode(ruleFound[3])));
+                        appLaunchIntent.putExtra("address", ruleFound[3]);
+
+                        List<ResolveInfo> resInfo = pm.queryIntentActivities(appLaunchIntent, 0);
+                        for (int i = 0; i < resInfo.size(); i++) {
+                            ResolveInfo ri = resInfo.get(i);
+                            String packageName = ri.activityInfo.packageName;
+                            if (packageName.contains("sms"))
+                                appLaunchIntent.setComponent(new ComponentName(packageName, ri.activityInfo.name));
+
+                        }
                     }
                 } catch (PackageManager.NameNotFoundException e) {
                     e.printStackTrace();
@@ -213,6 +244,15 @@ public class MainServices extends Service{
 
             case "Mail":
                 appLaunchIntent = new Intent(Intent.ACTION_SEND);
+                break;
+
+            case "Note":
+                ruleFound[2] ="";
+                //final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                //builder.setTitle("Note to Remind");
+                //builder.setMessage(ruleFound[3]);
+                //builder.show();
+                //appLaunchIntent = builder.create();
                 break;
 
             default:
