@@ -1,5 +1,6 @@
 package www.app.remindme.com.remindme;
 
+import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -12,11 +13,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.os.Build;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.provider.Settings;
 import android.provider.Telephony;
+import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 import java.io.BufferedInputStream;
@@ -45,17 +46,18 @@ public class MainServices extends Service{
     {
         String appName = getCurrentApp();
         if (null == appName){
-            startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
             String msgtoSend = "Allow Usage Access First, and then Re-enable App!";
             Toast.makeText(getApplicationContext(), msgtoSend, Toast.LENGTH_LONG).show();
+            startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             return false;
         }
 
         myAllRules = new ArrayList<>();
         myAllRules = getMyRules();
         if (myAllRules.isEmpty()){
-            String msgtoSend = "No Reminders Defined Yet.";//\n No Service to Start!";
+            String msgtoSend = "No Reminders Defined.";//\n No Service to Start!";
             Toast.makeText(getApplicationContext(), msgtoSend, Toast.LENGTH_LONG).show();
+            setServiceConfig(false);
             return false;
         }
 
@@ -67,8 +69,11 @@ public class MainServices extends Service{
 
     private void startTimer()
     {
-        serviceTimer.scheduleAtFixedRate( new serviceTimerTask(), 0, 4000);
-        serviceTimerRunning =true;
+        if (!serviceTimerRunning) {
+            serviceTimer = new Timer();
+            serviceTimer.scheduleAtFixedRate(new serviceTimerTask(), 0, 5000);
+            serviceTimerRunning = true;
+        }
     }
 
     private void stopTimer()
@@ -95,12 +100,12 @@ public class MainServices extends Service{
                     if (appName.equals(myDecodedRules[i][1]))
                         pushNotification(myDecodedRules[i], i);
 
-                timerToastHandler.sendMessage(msgtoSend);//.sendEmptyMessage(0);
+                //timerToastHandler.sendMessage(msgtoSend);//.sendEmptyMessage(0);
             }
         }
     }
 
-
+/*
     private final Handler timerToastHandler = new Handler()
     {
         @Override
@@ -108,8 +113,9 @@ public class MainServices extends Service{
             Toast.makeText(getApplicationContext(), "Hello " + msg.obj, Toast.LENGTH_SHORT).show();
         }
     };
+*/
 
-
+    @TargetApi(22)
     public String getCurrentApp()
     {
         String currentApp = null;
@@ -205,8 +211,8 @@ public class MainServices extends Service{
         builder.setContentTitle("Reminding you of a " + ruleFound[2]);
         builder.setAutoCancel(true);
         builder.setDefaults(Notification.DEFAULT_ALL);
-        builder.setSmallIcon(R.mipmap.ic_launcher);
-        builder.setLargeIcon(BitmapFactory.decodeResource(this.getResources(), R.mipmap.ic_launcher));
+        builder.setSmallIcon(R.drawable.ic_stat_name);//.mipmap.tim_span64);
+        builder.setLargeIcon(BitmapFactory.decodeResource(this.getResources(), R.drawable.ic_stat_name));
         builder.setPriority(Notification.PRIORITY_HIGH);
         builder.setVibrate( new long [0]);
 

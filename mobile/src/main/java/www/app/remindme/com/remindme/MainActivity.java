@@ -7,11 +7,13 @@ import android.widget.Button;
 import android.view.View;
 import android.content.Intent;
 import android.widget.CompoundButton;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 public class MainActivity extends AppCompatActivity {
     Button v_btn_configure;
     Button v_btn_addreminders;
+    Button v_btn_settings;
     ToggleButton v_btn_enableServices;
 
     public void startMainService()
@@ -29,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //startMainService();
         setContentView(R.layout.activity_main);
 
         v_btn_configure  = (Button) findViewById(R.id.btn_configure);
@@ -48,10 +49,20 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        v_btn_settings  = (Button) findViewById(R.id.btn_settings);
+        v_btn_settings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MainActivity.this, "Will be available in later releases \n :)", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         SharedPreferences spRules = getSharedPreferences("MyConfig", MODE_PRIVATE);
 
         v_btn_enableServices  = (ToggleButton) findViewById(R.id.btn_enableServices);
         v_btn_enableServices.setChecked(spRules.getBoolean("ServiceEnabled", false));
+        if (v_btn_enableServices.isChecked())
+            startMainService();
 
         v_btn_enableServices.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -63,17 +74,16 @@ public class MainActivity extends AppCompatActivity {
             }
 
         });
-/*
-        SharedPreferences.OnSharedPreferenceChangeListener listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-
-            }
-        };*/
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        //stopMainService();
     }
 }

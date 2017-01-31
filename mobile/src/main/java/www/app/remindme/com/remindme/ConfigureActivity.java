@@ -1,6 +1,5 @@
 package www.app.remindme.com.remindme;
 
-import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.SparseBooleanArray;
@@ -93,7 +92,7 @@ public class ConfigureActivity extends AppCompatActivity {
 
         for(int i=0; i<countR; i++ ) {
             output[i] = input_arr[i].split(";");
-            outputPrint[i] = "When " + output[i][0] +", Remind " + output[i][2] +"ing " +output[i][3];
+            outputPrint[i] = "When using " + output[i][0] +":\nRemind " + output[i][2].toLowerCase() +"ing " +output[i][3];
         }
         v_listview_allRules.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
